@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 from pymysql.err import InternalError, IntegrityError
 from db_manager.manager import get_db, get_connection
-from ..models.customer import CustomerPostRequest, CustomerPostResponse, CustomerPutRequest, CustomerPutResponse
+from common.datamodel import tuple_to_str
+from ..models.customer import CustomerPostRequest, CustomerPostResponse, CustomerPutRequest, CustomerPutResponse, CustomerGetResponse, CustomerGetRequestTuple
 
 CUSTOMER_TABLE_CONNECTION = get_connection("customer")
 
@@ -44,3 +45,27 @@ class CustomerManager:
             await cursor.close()
             conn.close()
         return CustomerPutResponse(detail="Customer Updated Successfully!")
+
+    @classmethod
+    async def get_customer(cls, from_offset: int, count: int):
+        field_list_str = tuple_to_str(CustomerGetRequestTuple._fields)
+        conn = await get_db(CUSTOMER_TABLE_CONNECTION)
+        cursor = await conn.cursor()
+        output = []
+        try:
+            query = """
+            SELECT %s FROM customer ORDER BY id LIMIT %s OFFSET %s;
+            """%(field_list_str, count, from_offset)
+            await cursor.execute(query)
+            datas = await cursor.fetchall()
+            for data in datas:
+                tmp_data = CustomerGetRequestTuple(*data)
+                output.append(
+                    CustomerGetResponse.parse_obj(tmp_data._asdict())
+                )
+        except Exception as err:
+            print(err)
+        finally:
+            await cursor.close()
+            conn.close()
+        return output

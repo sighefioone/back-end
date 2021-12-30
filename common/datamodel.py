@@ -16,3 +16,14 @@ class AllOptional(ModelMetaclass):
                 annotations[field] = Optional[annotations[field]]
         namespaces['__annotations__'] = annotations
         return super().__new__(cls, name, bases, namespaces, **kwargs)
+
+def tuple_to_str(datas: tuple):
+    output = ""
+    count = 0
+    for data in datas:
+        if count == 0:
+            output+=data
+        else:
+            output+=f",{data}"
+        count +=1
+    return output

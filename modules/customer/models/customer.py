@@ -1,5 +1,6 @@
 from hashlib import sha256
 from uuid import uuid4
+from datetime import datetime
 from collections import namedtuple
 from typing import Optional
 
@@ -40,3 +41,15 @@ class CustomerPutRequest(CustomerPostRequest, metaclass=AllOptional):
 
 class CustomerPutResponse(DataModel):
     detail: str
+
+class CustomerGetResponse(DataModel):
+    id: int
+    customer_id: str
+    email: str
+    username: str
+    first_name: str
+    last_name: Optional[str]
+    create_date: datetime
+    write_date: datetime
+
+CustomerGetRequestTuple = namedtuple("CustomerGetRequestTuple", ["id", "customer_id", "email", "username", "first_name", "last_name", "create_date", "write_date"])
